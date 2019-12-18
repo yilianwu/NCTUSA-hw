@@ -1,0 +1,33 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name=ftp_watchd_checktype
+#rcvar=ftp_watchd_checktype_enable
+
+start_precmd="ftp_watchd_checktype_prestart"
+stop_postcmd="ftp_watchd_checktype_stop"
+
+ftp_watchd_checktype_prestart() {
+#    echo '#!/bin/sh' > /tmp/fws1.sh
+    yon=$(sed -n 's/ftp_watchd_checktype_enable="\(.*\)"/\1/gp' /etc/rc.conf)
+    echo $yon
+    if [ $yon = "YES" ];then
+    	echo 'check filetype'
+	command_args="-B -r /tmp/fws2.sh"
+    else
+    	echo 'show filename'
+	command_args="-B -r /tmp/fws1.sh"
+    fi
+#    chmod +x /tmp/fws1.sh
+}
+ftp_watchd_checktype_stop() {
+	pid_num=$(cat /var/run/pure-uploadscript.pid)
+	echo "Kill: $pid_num"
+}
+echo $fws
+command="/usr/local/sbin/pure-uploadscript"
+#command_args="-B -r /tmp/fws.sh"
+
+load_rc_config $name
+run_rc_command "$1"
